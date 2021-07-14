@@ -894,7 +894,8 @@ int sqlite3_regexp_init(
   SQLITE_EXTENSION_INIT2(pApi);
   (void)pzErrMsg;  /* Unused */
   rc = sqlite3_create_function(db, "regexp", 2, 
-                            SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                            SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC
+                            |SQLITE_PLACEHOLDER,
                             0, re_sql_func, 0, 0);
   if( rc==SQLITE_OK ){
     /* The regexpi(PATTERN,STRING) function is a case-insensitive version
