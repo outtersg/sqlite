@@ -1913,6 +1913,8 @@ int sqlite3_is_interrupted(sqlite3 *db){
   return AtomicLoad(&db->u1.isInterrupted)!=0;
 }
 
+static void sqlite3InvalidFunction(sqlite3_context *, int, sqlite3_value **);
+
 /*
 ** This function is exactly the same as sqlite3_create_function(), except
 ** that it is designed to be called by internal code. The difference is
@@ -1934,6 +1936,7 @@ int sqlite3CreateFunc(
 ){
   FuncDef *p;
   int extraFlags;
+  int createFlags;
 
   assert( sqlite3_mutex_held(db->mutex) );
   assert( xValue==0 || xSFunc==0 );
@@ -1952,6 +1955,7 @@ int sqlite3CreateFunc(
   extraFlags = enc &  (SQLITE_DETERMINISTIC|SQLITE_DIRECTONLY|
                        SQLITE_SUBTYPE|SQLITE_INNOCUOUS|
                        SQLITE_RESULT_SUBTYPE|SQLITE_SELFORDER1);
+  createFlags = enc & (SQLITE_PLACEHOLDER);
   enc &= (SQLITE_FUNC_ENCMASK|SQLITE_ANY);
 
   /* The SQLITE_INNOCUOUS flag is the same bit as SQLITE_FUNC_UNSAFE.  But
@@ -2007,6 +2011,11 @@ int sqlite3CreateFunc(
   */
   p = sqlite3FindFunction(db, zFunctionName, nArg, (u8)enc, 0);
   if( p && (p->funcFlags & SQLITE_FUNC_ENCMASK)==(u32)enc && p->nArg==nArg ){
+    if( (createFlags & SQLITE_PLACEHOLDER)
+     && p->xSFunc != sqlite3InvalidFunction ){
+      /* If the caller does not want to replace an existing func, fine. */
+      return SQLITE_OK;
+    }
     if( db->nVdbeActive ){
       sqlite3ErrorWithMsg(db, SQLITE_BUSY,
         "unable to delete/modify user-function due to active statements");
