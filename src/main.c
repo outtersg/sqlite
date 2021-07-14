@@ -25,6 +25,9 @@
 #if defined(SQLITE_ENABLE_ICU) || defined(SQLITE_ENABLE_ICU_COLLATIONS)
 # include "sqliteicu.h"
 #endif
+#ifdef SQLITE_ENABLE_PCRE
+# include "sqlite3pcre.h"
+#endif
 
 /*
 ** This is an extension initializer that is a no-op and always
@@ -63,6 +66,10 @@ static int (*const sqlite3BuiltinExtensions[])(sqlite3*) = {
 #endif
 #if defined(SQLITE_ENABLE_ICU) || defined(SQLITE_ENABLE_ICU_COLLATIONS)
   sqlite3IcuInit,
+#endif
+#ifdef SQLITE_ENABLE_PCRE
+  /* PCRE comes after ICU, so that its regexp function is preferred */
+  sqlite3PcreInit,
 #endif
 #ifdef SQLITE_ENABLE_RTREE
   sqlite3RtreeInit,

@@ -190,6 +190,7 @@ foreach hdr {
    sqlite3session.h
    sqlite3.h
    sqlite3ext.h
+   sqlite3pcre.h
    sqlite3rbu.h
    sqliteicu.h
    sqliteInt.h

@@ -416,7 +416,7 @@ T.cc.sqlite ?= $(T.compile) $(T.cc.sqlite.extras)
 CFLAGS.intree_includes = \
     -I. -I$(TOP)/src -I$(TOP)/ext/rtree -I$(TOP)/ext/icu \
     -I$(TOP)/ext/fts3 -I$(TOP)/ext/session \
-    -I$(TOP)/ext/misc
+    -I$(TOP)/ext/misc -I$(TOP)/ext/pcre
 T.cc.sqlite += $(CFLAGS.intree_includes)
 
 #
@@ -720,6 +720,7 @@ SRC += \
 SRC += \
   $(TOP)/ext/misc/stmt.c
 SRC += \
+  $(TOP)/ext/pcre/sqlite3pcre.h \
   $(TOP)/ext/pcre/pcre.c
 
 # Generated source code files
@@ -924,6 +925,8 @@ EXTHDR += \
   $(TOP)/ext/rtree/geopoly.c
 EXTHDR += \
   $(TOP)/ext/icu/sqliteicu.h
+EXTHDR += \
+  $(TOP)/ext/pcre/sqlite3pcre.h
 EXTHDR += \
   $(TOP)/ext/rtree/sqlite3rtree.h
 
