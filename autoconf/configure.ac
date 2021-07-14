@@ -218,6 +218,23 @@ else
 fi
 #-----------------------------------------------------------------------
 
+#-------------------------------------------------------------------------
+#   --enable-pcre
+#
+AC_ARG_ENABLE([pcre],
+  [AC_HELP_STRING([--disable-pcre],[disable pcre even if detected])],
+  [with_pcre=$enableval],
+  [with_pcre=auto])
+AS_IF([ test x"$enable_pcre" != xno ],[
+  AC_CHECK_HEADERS([pcre.h],[
+    sLIBS=$LIBS
+    AC_SEARCH_LIBS([pcre_compile],[pcre],[
+      BUILD_CFLAGS="$BUILD_CFLAGS -DSQLITE_ENABLE_PCRE"
+    ],[])
+  ])
+])
+#-----------------------------------------------------------------------
+
 #-----------------------------------------------------------------------
 #   --enable-debug
 #
