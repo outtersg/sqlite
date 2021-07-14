@@ -915,6 +915,9 @@ enable_update_limit
 enable_geopoly
 enable_rtree
 enable_session
+enable_pcre
+with_pcre_lib
+with_pcre_inc
 enable_gcov
 '
       ac_precious_vars='build_alias
@@ -1570,6 +1573,7 @@ Optional Features:
   --enable-geopoly        Enable the GEOPOLY extension
   --enable-rtree          Enable the RTREE extension
   --enable-session        Enable the SESSION extension
+  --disable-pcre          disable pcre even if detected
   --enable-gcov           Enable coverage testing using gcov
 
 Optional Packages:
@@ -1582,6 +1586,8 @@ Optional Packages:
                           (tclConfig.sh)
   --with-readline-lib     specify readline library
   --with-readline-inc     specify readline include paths
+  --with-pcre-lib         specify pcre library flags
+  --with-pcre-inc         specify pcre include flags
 
 Some influential environment variables:
   CC          C compiler command
@@ -11793,6 +11799,107 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+fi
+
+#########
+# Do we link against libpcre and use it to implement regexp?
+TARGET_PCRE_LIBS=""
+TARGET_PCRE_INC=""
+# Check whether --enable-pcre was given.
+if test "${enable_pcre+set}" = set; then :
+  enableval=$enable_pcre; with_pcre=$enableval
+else
+  with_pcre=auto
+fi
+
+
+if test x"$with_pcre" != xno; then
+	found="yes"
+
+
+# Check whether --with-pcre-lib was given.
+if test "${with_pcre_lib+set}" = set; then :
+  withval=$with_pcre_lib; with_pcre_lib=$withval
+else
+  with_pcre_lib="auto"
+fi
+
+	if test "x$with_pcre_lib" = xauto; then
+		sLIBS="$LIBS"
+		LIBS=""
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcre_compile in -lpcre" >&5
+$as_echo_n "checking for pcre_compile in -lpcre... " >&6; }
+if ${ac_cv_lib_pcre_pcre_compile+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpcre  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcre_compile ();
+int
+main ()
+{
+return pcre_compile ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pcre_pcre_compile=yes
+else
+  ac_cv_lib_pcre_pcre_compile=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre_pcre_compile" >&5
+$as_echo "$ac_cv_lib_pcre_pcre_compile" >&6; }
+if test "x$ac_cv_lib_pcre_pcre_compile" = xyes; then :
+  TARGET_PCRE_LIBS="-lpcre"
+else
+  found="no"
+fi
+
+		LIBS="$sLIBS"
+	else
+		TARGET_PCRE_LIBS="$with_pcre_lib"
+	fi
+
+
+# Check whether --with-pcre-inc was given.
+if test "${with_pcre_inc+set}" = set; then :
+  withval=$with_pcre_inc; with_pcre_inc=$withval
+else
+  with_pcre_inc="auto"
+fi
+
+	if test "x$with_pcre_inc" = xauto; then
+		ac_fn_c_check_header_mongrel "$LINENO" "pcre.h" "ac_cv_header_pcre_h" "$ac_includes_default"
+if test "x$ac_cv_header_pcre_h" = xyes; then :
+  found="yes"
+else
+  found="no"
+fi
+
+
+	else
+		TARGET_PCRE_INC="$with_pcre_inc"
+	fi
+
+	if test x"$found" = xyes; then
+		CPPFLAGS="${CPPFLAGS} ${TARGET_PCRE_INC}"
+		LIBS="${LIBS} ${TARGET_PCRE_LIBS}"
+		OPT_FEATURE_FLAGS="${OPT_FEATURE_FLAGS} -DSQLITE_ENABLE_PCRE"
+	fi
 fi
 
 #########
