@@ -730,6 +730,48 @@ else
 fi
 
 #########
+# Do we link against libpcre and use it to implement regexp?
+TARGET_PCRE_LIBS=""
+TARGET_PCRE_INC=""
+AC_ARG_ENABLE([pcre],
+	[AC_HELP_STRING([--disable-pcre],[disable pcre even if detected])],
+	[with_pcre=$enableval],
+	[with_pcre=auto])
+
+if test x"$with_pcre" != xno; then
+	found="yes"
+
+	AC_ARG_WITH([pcre-lib],
+		[AC_HELP_STRING([--with-pcre-lib],[specify pcre library flags])],
+		[with_pcre_lib=$withval],
+		[with_pcre_lib="auto"])
+	if test "x$with_pcre_lib" = xauto; then
+		sLIBS="$LIBS"
+		LIBS=""
+		AC_CHECK_LIB([pcre], [pcre_compile], [TARGET_PCRE_LIBS="-lpcre"], [found="no"])
+		LIBS="$sLIBS"
+	else
+		TARGET_PCRE_LIBS="$with_pcre_lib"
+	fi
+
+	AC_ARG_WITH([pcre-inc],
+		[AC_HELP_STRING([--with-pcre-inc],[specify pcre include flags])],
+		[with_pcre_inc=$withval],
+		[with_pcre_inc="auto"])
+	if test "x$with_pcre_inc" = xauto; then
+		AC_CHECK_HEADER(pcre.h, [found="yes"], [found="no"])
+	else
+		TARGET_PCRE_INC="$with_pcre_inc"
+	fi
+
+	if test x"$found" = xyes; then
+		CPPFLAGS="${CPPFLAGS} ${TARGET_PCRE_INC}"
+		LIBS="${LIBS} ${TARGET_PCRE_LIBS}"
+		OPT_FEATURE_FLAGS="${OPT_FEATURE_FLAGS} -DSQLITE_ENABLE_PCRE"
+	fi
+fi
+
+#########
 # attempt to duplicate any OMITS and ENABLES into the ${OPT_FEATURE_FLAGS} parameter
 for option in $CFLAGS $CPPFLAGS
 do
