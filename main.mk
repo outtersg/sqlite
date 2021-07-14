@@ -49,6 +49,7 @@ TCCX += -I$(TOP)/ext/rtree -I$(TOP)/ext/icu -I$(TOP)/ext/fts3
 TCCX += -I$(TOP)/ext/async -I$(TOP)/ext/userauth
 TCCX += -I$(TOP)/ext/session
 TCCX += -I$(TOP)/ext/fts5
+TCCX += -I${TOP}/ext/pcre
 THREADLIB += $(LIBS)
 
 # Object files for the SQLite library.
@@ -247,6 +248,7 @@ SRC += \
   $(TOP)/ext/misc/json1.c \
   $(TOP)/ext/misc/stmt.c
 SRC += \
+  $(TOP)/ext/pcre/sqlite3pcre.h \
   $(TOP)/ext/pcre/pcre.c
 
 
@@ -499,6 +501,8 @@ EXTHDR += \
   $(TOP)/ext/fts5/fts5.h
 EXTHDR += \
   $(TOP)/ext/userauth/sqlite3userauth.h
+EXTHDR += \
+  $(TOP)/ext/pcre/sqlite3pcre.h
 
 # executables needed for testing
 #

@@ -33,6 +33,7 @@ CFLAGS = @CPPFLAGS@ @CFLAGS@
 TCC = ${CC} ${CFLAGS} -I. -I${TOP}/src -I${TOP}/ext/rtree -I${TOP}/ext/icu
 TCC += -I${TOP}/ext/fts3 -I${TOP}/ext/async -I${TOP}/ext/session
 TCC += -I${TOP}/ext/userauth
+TCC += -I${TOP}/ext/pcre
 
 # Define this for the autoconf-based build, so that the code knows it can
 # include the generated config.h
@@ -369,6 +370,7 @@ SRC += \
   $(TOP)/ext/misc/json1.c \
   $(TOP)/ext/misc/stmt.c
 SRC += \
+  $(TOP)/ext/pcre/sqlite3pcre.h \
   $(TOP)/ext/pcre/pcre.c
 
 # Generated source code files
@@ -580,6 +582,8 @@ EXTHDR += \
   $(TOP)/ext/rtree/sqlite3rtree.h
 EXTHDR += \
   $(TOP)/ext/userauth/sqlite3userauth.h
+EXTHDR += \
+  $(TOP)/ext/pcre/sqlite3pcre.h
 
 # executables needed for testing
 #
