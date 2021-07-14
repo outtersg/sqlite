@@ -246,6 +246,8 @@ SRC += \
 SRC += \
   $(TOP)/ext/misc/json1.c \
   $(TOP)/ext/misc/stmt.c
+SRC += \
+  $(TOP)/ext/pcre/pcre.c
 
 
 # FTS5 things

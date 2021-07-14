@@ -439,6 +439,7 @@ foreach file {
    sqlite3session.c
    fts5.c
    stmt.c
+   pcre.c
 } {
   copy_file $srcdir/$file
 }
