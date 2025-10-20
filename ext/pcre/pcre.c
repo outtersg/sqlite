@@ -26,7 +26,7 @@
 #endif
 #endif
 #if defined(WITH_PCRE) && !defined(WITH_PCRE2) && !defined(WITH_PCRE1)
-#define WITH_PCRE1
+#define WITH_PCRE2
 #endif
 
 #include <assert.h>
