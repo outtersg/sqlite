@@ -9,6 +9,14 @@
 
 #if !defined(SQLITE_CORE) || defined(SQLITE_ENABLE_PCRE)
 
+
+#if defined(SQLITE_ENABLE_PCRE2)
+#define WITH_PCRE2
+#endif
+#if defined(SQLITE_ENABLE_PCRE1)
+#define WITH_PCRE1
+#endif
+
 #ifdef WITH_HYPERSCAN
 /* https://www.intel.com/content/www/us/en/developer/articles/training/why-and-how-to-replace-pcre-with-hyperscan.html */
 /* TODO implement pcre fallback for com̂plex expressions. */

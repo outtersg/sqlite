@@ -71,6 +71,8 @@ CFLAGS.readline = @CFLAGS_READLINE@
 LDFLAGS.rt = @LDFLAGS_RT@
 LDFLAGS.icu = @LDFLAGS_ICU@
 CFLAGS.icu = @CFLAGS_ICU@
+LDFLAGS.pcre = @LDFLAGS_PCRE@
+CFLAGS.pcre = @CFLAGS_PCRE@
 
 # INSTALL reminder: we specifically do not strip binaries,
 # as discussed in https://sqlite.org/forum/forumpost/9a67df63eda9925c.
@@ -132,8 +134,9 @@ LDFLAGS.libsqlite3 = \
   $(LDFLAGS.rpath) $(LDFLAGS.pthread) \
   $(LDFLAGS.math) $(LDFLAGS.dlopen) \
   $(LDFLAGS.zlib) $(LDFLAGS.icu) \
+  $(LDFLAGS.pcre) \
   $(LDFLAGS.rt) $(LDFLAGS.configure)
-CFLAGS.libsqlite3 = -I. $(CFLAGS.core) $(CFLAGS.icu) $(OPT_FEATURE_FLAGS)
+CFLAGS.libsqlite3 = -I. $(CFLAGS.core) $(CFLAGS.icu) $(CFLAGS.pcre) $(OPT_FEATURE_FLAGS)
 
 sqlite3.o: $(TOP)/sqlite3.h $(TOP)/sqlite3.c
 	$(CC) -c $(TOP)/sqlite3.c -o $@ $(CFLAGS) $(CFLAGS.libsqlite3)
@@ -247,8 +250,8 @@ sqlite3$(T.exe): $(TOP)/shell.c $(sqlite3-shell-deps.$(ENABLE_STATIC_SHELL))
 		$(TOP)/shell.c $(sqlite3-shell-link-flags.$(ENABLE_STATIC_SHELL)) \
 		$(sqlite3-shell-static.flags.$(STATIC_CLI_SHELL)) \
 		-I. $(OPT_FEATURE_FLAGS) $(SHELL_OPT) \
-		$(CFLAGS) $(CFLAGS.readline) $(CFLAGS.icu) \
-		$(LDFLAGS.readline)
+		$(CFLAGS) $(CFLAGS.readline) $(CFLAGS.icu) $(CFLAGS.pcre) \
+		$(LDFLAGS.readline) $(LDFLAGS.pcre)
 
 sqlite3$(T.exe)-1:
 sqlite3$(T.exe)-0: sqlite3$(T.exe)

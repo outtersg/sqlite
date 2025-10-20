@@ -287,6 +287,18 @@ proc sqlite-configure {buildMode configScript} {
       }
     }
 
+    # Options for regular expressions: replacing REGEXP with an external library
+    regex-lib {
+      {*} {
+        pcre=1
+          => {Disable PCRE support}
+        pcre2=0
+          => {Explicitly use PCRE2 as PCRE}
+        pcre1=0
+          => {Explicitly use PCRE1 as PCRE}
+      }
+    }
+
     # Options for ICU: International Components for Unicode
     icu {
       {*} {
@@ -518,6 +530,7 @@ proc sqlite-configure-finalize {} {
   sqlite-handle-load-extension
   sqlite-handle-math
   sqlite-handle-icu
+  sqlite-handle-regex-lib
   if {[proj-opt-exists readline]} {
     sqlite-handle-line-editing
   }
@@ -1321,6 +1334,79 @@ proc sqlite-handle-line-editing {} {
 
 
 ########################################################################
+# Regular Expressions external libraries
+# defines HAVE_PCRE (and one of its children HAVE_PCRE2, HAVE_PCRE1)
+proc sqlite-check-pcre-flags {bin} {
+  if {"pcre2-config" eq $bin} {
+    set cflags [exec $bin --cflags]
+    set ldflags [exec $bin --libs8]
+  }
+  if {"pcre-config" eq $bin} {
+    set cflags [exec $bin --cflags]
+    set ldflags [exec $bin --libs]
+  }
+  define-append LDFLAGS_PCRE $ldflags
+  define-append CFLAGS_PCRE $cflags
+}
+
+proc sqlite-check-regex-lib {} {
+  msg-result "Checking for external regular expressions library..."
+
+  define LDFLAGS_PCRE ""
+  define CFLAGS_PCRE ""
+
+  # @todo use sqlite-check-pcre-flags's flags in cctest, instead of hardcoding pcre2-8
+  if {[opt-bool pcre] || [opt-bool pcre2]} {
+    set pcreLibName "pcre2"
+    sqlite-check-pcre-flags "pcre2-config"
+    if {[cctest \
+           -cflags [get-define CFLAGS_PCRE] -libs [get-define LDFLAGS_PCRE] -nooutput 1 \
+           -source {
+             #define PCRE2_CODE_UNIT_WIDTH 8
+             #include <pcre2.h>
+             int main(void) {
+               int n; size_t t;
+               pcre2_compile((const unsigned char *)"", 0, 0, &n, &t, NULL);
+               return 0;
+             }
+           }
+    ]} {
+      sqlite-add-feature-flag -shell -DSQLITE_ENABLE_PCRE -DSQLITE_ENABLE_PCRE2
+      return pcre2
+    }
+  }
+
+  if {[opt-bool pcre] || [opt-bool pcre1]} {
+    set pcreLibName "pcre1"
+    sqlite-check-pcre-flags "pcre-config"
+    if {[cctest \
+           -cflags "" -libs "pcre" -nooutput 1 \
+           -source {
+             #include <pcre.h>
+             int main(void) {
+               char ** res;
+               pcre_compile("", 0, &res, &n, NULL);
+               return 0;
+             }
+           }
+    ]} {
+      sqlite-add-feature-flag -shell -DSQLITE_ENABLE_PCRE -DSQLITE_ENABLE_PCRE1
+      return pcre1
+    }
+  }
+
+  return "none"
+}; # sqlite-check-regex-lib
+
+########################################################################
+# Runs sqlite-check-regex-lib and adds a message around it
+# In the canonical build this must not be called before
+# sqlite-determine-codegen-tcl.
+proc sqlite-handle-regex-lib {} {
+  msg-result "External regular expressions library: [sqlite-check-regex-lib]"
+}
+
+########################################################################
 # ICU - International Components for Unicode
 #
 # Handles these flags:
@@ -1798,6 +1884,9 @@ proc sqlite-handle-wasi-sdk {} {
     gcov
     icu-collations
     load-extension
+    pcre
+    pcre1
+    pcre2
     readline
     shared
     tcl

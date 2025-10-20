@@ -171,6 +171,8 @@ LDFLAGS.shlib ?= -shared
 LDFLAGS.rt ?= # nanosleep on some platforms
 LDFLAGS.icu ?= # -licui18n -licuuc -licudata
 CFLAGS.icu ?=
+LDFLAGS.pcre ?= # -lpcre2-8
+CFLAGS.pcre ?=
 LDFLAGS.libsqlite3.soname ?= # see https://sqlite.org/src/forumpost/5a3b44f510df8ded
 LDFLAGS.libsqlite3.os-specific ?= # see https://sqlite.org/forum/forumpost/9dfd5b8fd525a5d7
 # libreadline (or a workalike):
@@ -454,6 +456,7 @@ LDFLAGS.libsqlite3 = \
   $(LDFLAGS.rpath) $(LDFLAGS.pthread) \
   $(LDFLAGS.math) $(LDFLAGS.dlopen) \
   $(LDFLAGS.zlib) $(LDFLAGS.icu) \
+  $(LDFLAGS.pcre) \
   $(LDFLAGS.rt) $(LDFLAGS.configure)
 
 #
@@ -637,7 +640,6 @@ SRC = \
   $(TOP)/src/pcache.c \
   $(TOP)/src/pcache.h \
   $(TOP)/src/pcache1.c \
-  $(TOP)/src/pcre.c \
   $(TOP)/src/pragma.c \
   pragma.h \
   $(TOP)/src/prepare.c \
@@ -1331,9 +1333,6 @@ os_unix.o:	$(TOP)/src/os_unix.c $(DEPS_OBJ_COMMON)
 
 os_win.o:	$(TOP)/src/os_win.c $(DEPS_OBJ_COMMON)
 	$(T.cc.sqlite) -c $(TOP)/src/os_win.c
-
-pcre.o:	$(TOP)/src/pcre.c $(DEPS_OBJ_COMMON)
-	$(T.cc.sqlite) -c $(TOP)/src/pcre.c
 
 pragma.o:	$(TOP)/src/pragma.c $(DEPS_OBJ_COMMON)
 	$(T.cc.sqlite) -c $(TOP)/src/pragma.c
@@ -2189,7 +2188,9 @@ sqlite3$(T.exe):	shell.c sqlite3.c
 		shell.c sqlite3.c \
 		$(sqlite3-shell-static.flags.$(STATIC_CLI_SHELL)) \
 		$(CFLAGS.readline) $(SHELL_OPT) $(CFLAGS.icu) \
-		$(LDFLAGS.libsqlite3) $(LDFLAGS.readline)
+		$(CFLAGS.pcre) \
+		$(LDFLAGS.libsqlite3) $(LDFLAGS.readline) \
+		$(LDFLAGS.pcre)
 #
 # Build sqlite3$(T.exe) by default except in wasi-sdk builds.  Yes, the
 # semantics of 0 and 1 are confusingly swapped here.
