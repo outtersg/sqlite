@@ -1,3 +1,11 @@
+<h1 align="center">SQLite with PCRE2 in core</h1>
+
+This fork is primarily intended to host the **integration of PCRE2 to SQLite's core**,\
+on [pcre-on-3.50](https://github.com/outtersg/sqlite/tree/pcre-on-3.50) as the authoritative branch (with master being `pcre-on-3.50` + this modified README).
+
+This work is based on [Alexey Tourbin's pcre.c](https://git.altlinux.org/people/at/packages/?p=sqlite3-pcre.git) (public domain), that makes PCRE2 an (explicitely loadable) SQLite module\
+adapted at [https://github.com/outtersg/sqlite3-pcre](https://github.com/outtersg/sqlite3-pcre) (notably port to PCRE2).
+
 <h1 align="center">SQLite Source Repository</h1>
 
 This repository contains the complete source code for the
