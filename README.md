@@ -6,6 +6,48 @@ on [pcre-on-3.50](https://github.com/outtersg/sqlite/tree/pcre-on-3.50) as the a
 This work is based on [Alexey Tourbin's pcre.c](https://git.altlinux.org/people/at/packages/?p=sqlite3-pcre.git) (public domain), that makes PCRE2 an (explicitely loadable) SQLite module\
 adapted at [https://github.com/outtersg/sqlite3-pcre](https://github.com/outtersg/sqlite3-pcre) (notably port to PCRE2).
 
+## Why PCRE2?
+
+Performance, performance, performance…
+
+The module overloads SQLite's default implementation of the `REGEXP` operator (using ICU's regex handling when compiled with ICU) by one plugged to PCRE2.
+
+* The following raw performance test (`REGEXP` of all words starting and ending with `'a'` in 400000 rows of a 100-chars column of random strings of a to z and spaces: _simple regex but some data_ to crunch with it) returns consistent results of **0.9 s for ICU vs 0.2 s for PCRE2**.\
+* A real-world use case showed similar results (sometimes more than 1 minute for ICU, not even a dozen of seconds for PCRE2) when searching a ticketing system (dozens of thousands of tickets, thousands of characters per ticket) for something that looked like one of the entity IDs of a client (`(^|[^a-zA-Z0-9])(client name|client site 1|client site 2|…|client site 123)([^a-zA-Z0-9]|$)`)\
+  So, a _complex_ regex with some data; and the more `|`s in the regex, the more PCRE2's implementation shined.
+
+```sh
+[ -f grostexte.sqlite3 ] ||
+{
+    sqlite3 grostexte.sqlite3 "
+        create table t as
+        with
+        	n as materialized -- https://stackoverflow.com/a/79795084/1346819
+        	(
+        		select value pos, random() % 20 + 7 n from generate_series(1, 400000 * 100) -- n lignes * n caractères par ligne
+        	),
+        	c as materialized
+        	(
+        		select pos, n, n b, case when n <= 0 then ' ' else char(96 + n) end c from n
+        	)
+        select string_agg(c, '') t from c group by pos / 20;
+        "
+}
+
+mkdir -p build.icu build.pcre
+( cd build.icu && ../configure --disable-pcre && make )
+( cd build.pcre && ../configure && make )
+for s in pcre icu pcre icu pcre icu
+do
+	time ./build.$s/sqlite3 grostexte.sqlite3 "select count(1) from t where t regexp '(^| )a[a-z]*a( |$)'"
+done
+```
+
+## Why in the core?
+
+Because it's simpler to have the quickest (I did not test for features: maybe ICU is better on international charsets?) implementation loaded by default,\
+without having to think about it ("Why has the search become so slow since the last upgrade? … Oh we overwrote our `.sqliterc` that `.load`ed the module!").
+
 <h1 align="center">SQLite Source Repository</h1>
 
 This repository contains the complete source code for the
